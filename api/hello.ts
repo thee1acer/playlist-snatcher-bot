@@ -5,8 +5,11 @@ import {
   getUserDownloadHistory,
   getUserDownloadHistoryByHistoryId
 } from "./lib/download";
-import { handleStartCommand } from "./commands/about";
+import { handleStartCommand } from "./commands/start";
 import { handleExitAction } from "./actions/exit";
+import { handleHelpCommand } from "./commands/help";
+import { handleAboutCommand } from "./commands/about";
+import { handleInteractiveMenuCommand } from "./commands/menu";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
@@ -17,43 +20,13 @@ bot.telegram.setMyCommands([
   { command: "about", description: "About this bot 🤖" }
 ]);
 
-// Handle /start command
-bot.start(async (ctx) => {
-  await handleStartCommand(ctx);
-});
+//bot commands
+bot.start(async (ctx) => await handleStartCommand(ctx));
+bot.help(async (ctx) => await handleHelpCommand(ctx));
+bot.command("menu", async (ctx) => await handleInteractiveMenuCommand(ctx));
+bot.command("about", async (ctx) => await handleAboutCommand(ctx));
 
-// Handle /help command
-bot.help(async (ctx) => {
-  ctx.reply(
-    "Here is some documentation I can help you with: ",
-    Markup.inlineKeyboard([
-      [Markup.button.callback("📜 View Bot Documentation", "view_bot_docs")],
-      [Markup.button.callback("❌ End chat", "exit")]
-    ])
-  );
-});
-
-bot.command("menu", (ctx) => ctx.reply("Showing interactive menu"));
-
-bot.command("about", (ctx) =>
-  ctx.reply(
-    "📌 *Playlist Downloader Bot*\n\n\
-    *Overview* \n\n\
-    The Playlist Downloader Bot is a Telegram bot designed to fetch and download playlists from various music streaming platforms. It allows users to input a playlist URL from services like Spotify, YouTube, Apple Music, SoundCloud, and Deezer, and retrieves the tracks while providing download links or converted audio files. The bot is built using Node.js, Telegraf (Telegram Bot API), and Prisma for database management, ensuring seamless storage of user preferences and download history. Hosted on Vercel, the bot operates efficiently with serverless functions, making it scalable and reliable. \n \
-    \nFeatures\n\
-      \t🔍 Playlist Detection: Supports multiple streaming platforms and extracts tracks from URLs.\n\
-      \t📥 Music Download: Fetches high-quality audio files for each song in a playlist.\n\
-      \t📂 File Management: Provides downloadable links or directly sends files in Telegram.\n\
-      \t⚡ User Subscriptions: Tracks user preferences, ensuring a personalized experience.\n\
-      \t🛠 Database Integration: Uses Prisma + PostgreSQL for storing user interactions.\n\
-      \t🔄 Webhook Integration: Uses Vercel Serverless Functions for real-time bot responses.\n\
-      \t🛑 Legal Compliance: Ensures fair usage policies and copyright adherence.\n\n\
-    🔹 To get started, simply send a playlist URL to the bot and select the desired download format. The bot will process the request and provide links or direct downloads. 🚀 \n \
-  "
-  )
-);
-
-//function
+//serverless function handler
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     await bot.handleUpdate(req.body);
