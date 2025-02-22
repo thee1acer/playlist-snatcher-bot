@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { Telegraf } from "telegraf";
 import { checkIfUserExists } from "./lib/authentication";
