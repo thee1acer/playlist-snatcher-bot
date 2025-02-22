@@ -94,9 +94,13 @@ bot.on("text", async (ctx) => {
         ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
       }
     } catch (err) {
-      ctx.reply(
-        "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
-      );
+      ctx
+        .reply(
+          "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
+        )
+        .then((_) => {
+          ctx.reply(err);
+        });
     }
   } else {
     ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
