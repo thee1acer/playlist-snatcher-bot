@@ -61,6 +61,10 @@ export async function handleFetchPlayListMedia(
   playlistUrl: string,
   outputFolder: string
 ) {
+  const { url } = await put("downloads/blob.txt", "Hello World!", {
+    access: "public"
+  });
+
   if (!fs.existsSync(outputFolder)) {
     console.log(`Creating folder at ${outputFolder}`);
     fs.mkdirSync(outputFolder, { recursive: true });
