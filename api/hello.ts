@@ -97,7 +97,7 @@ bot.on("text", async (ctx) => {
       }
     } catch (err) {
       ctx.reply(
-        "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
+        `Uh Oh! Came across an error while processing playlist link 🤖\n\n ${err}\n\n Please try again later.. `
       );
     }
   } else {
