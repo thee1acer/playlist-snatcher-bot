@@ -81,3 +81,9 @@ export async function getUserDownloadHistory(id: number) {
     where: { userId: user.id }
   });
 }
+
+export async function getUserDownloadHistoryByHistoryId(historyId: string) {
+  return await prisma.downloadHistory.findFirst({
+    where: { id: Number(historyId) }
+  });
+}

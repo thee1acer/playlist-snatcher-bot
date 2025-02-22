@@ -3,6 +3,7 @@ import { Telegraf, Markup } from "telegraf";
 import {
   checkIfUserExists,
   getUserDownloadHistory,
+  getUserDownloadHistoryByHistoryId,
   userIsSubscribed
 } from "./lib/authentication";
 
@@ -128,6 +129,51 @@ bot.action("download_playlist", async (ctx) => {
   }
 });
 
+bot.action("view_download_history", async (ctx) => {
+  const { id } = ctx.from;
+
+  const downloadHistory = await getUserDownloadHistory(id);
+
+  if (downloadHistory == null)
+    ctx.editMessageText(
+      "Uh Oh! You do not have any existing download history 😣😭"
+    );
+  else {
+    ctx.reply(
+      "Here is your download history:",
+      Markup.inlineKeyboard(
+        downloadHistory.map((download) =>
+          Markup.button.callback(
+            `${download.downloadUrl}`,
+            `view_history:${download.id}`
+          )
+        )
+      )
+    );
+  }
+});
+bot.action(/^view_history:(\d+)$/, async (ctx) => {
+  const downloadId = ctx.match[1];
+  const history = await getUserDownloadHistoryByHistoryId(downloadId);
+
+  if (history == null) ctx.reply("Uh Oh! Issue getting Download history 🤖");
+  else {
+    const formattedDate = new Date(history.downloadDate).toLocaleDateString(
+      "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "2-digit"
+      }
+    );
+    ctx.reply(`📅 Date: ${formattedDate}`);
+
+    ctx.reply(
+      `History: \n\n\t Download ID: ${history.id} \n\t Download History: ${history.downloadUrl} \n\t Download Date: ${formattedDate}`
+    );
+  }
+});
+
 bot.action("add_item", (ctx) => {
   ctx.answerCbQuery();
   ctx.reply("Send me the item you want to add.");
@@ -147,13 +193,11 @@ bot.action("exit", (ctx) => {
 bot.on("text", (ctx) => {
   const messageText = ctx.message?.text || "";
 
-  // Regex to detect URLs
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   if (urlRegex.test(messageText)) {
     ctx.reply("I see you sent a link! Processing it... 🔄");
 
-    // Do something with the link, like downloading a playlist
     const links = messageText.match(urlRegex);
     console.log("User sent links:", links);
 
