@@ -2,14 +2,10 @@
   "repository": "https://github.com/thee1acer/playlist-snatcher-bot",
   "license": "MIT",
   "private": true,
-  "type": "module",
   "devDependencies": {
     "@types/node": "^17.0.42",
     "@vercel/node": "^2.9.6",
     "typescript": "^5.7.3"
-  },
-  "prisma": {
-    "seed": "set NODE_OPTIONS=--loader ts-node/esm&& npx ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",
@@ -20,7 +16,6 @@
   },
   "scripts": {
     "build": "prisma generate",
-    "postinstall": "prisma generate",
-    "seed": "set NODE_OPTIONS=--loader ts-node/esm&& npx ts-node prisma/seed.ts"
+    "postinstall": "prisma generate"
   }
 }
