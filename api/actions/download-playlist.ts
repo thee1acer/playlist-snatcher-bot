@@ -60,12 +60,20 @@ export async function handleDownloadPlayListAction(ctx: Context) {
 
 export async function handleFetchPlayListMedia(
   playlistUrl: string,
-  outputFolder: string
+  outputFolder: string,
+  tempDir: string
 ) {
-  console.log("Setting up directory");
-  await fs.promises.mkdir(outputFolder, { recursive: true });
-  console.log("Fetching tracklist");
+  console.log("Setting up root directory");
+  try {
+    await fs.promises.access(tempDir);
+  } catch {
+    await fs.promises.mkdir(tempDir, { recursive: true });
+  }
 
+  console.log("Setting up output directory");
+  await fs.promises.mkdir(outputFolder, { recursive: true });
+
+  console.log("Fetching tracklist");
   return new Promise((resolve, reject) => {
     const process = spawn("yt-dlp", [
       playlistUrl,

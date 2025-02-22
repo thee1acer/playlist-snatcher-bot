@@ -83,9 +83,10 @@ bot.on("text", async (ctx) => {
         ctx.reply("Processing... 🔄");
 
         const playlistUrl = links[0];
-        const outputFolder = `tmp/playlist-${randomUUID()}/`;
+        const tempDir = "/tmp";
+        const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
-        await handleFetchPlayListMedia(playlistUrl, outputFolder).then(
+        await handleFetchPlayListMedia(playlistUrl, outputFolder, tempDir).then(
           async (_) => {
             await handleSendPlayListZipFile(ctx, outputFolder);
           }
@@ -94,13 +95,9 @@ bot.on("text", async (ctx) => {
         ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
       }
     } catch (err) {
-      ctx
-        .reply(
-          "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
-        )
-        .then((_) => {
-          ctx.reply(err);
-        });
+      ctx.reply(
+        "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
+      );
     }
   } else {
     ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
