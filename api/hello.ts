@@ -70,25 +70,33 @@ bot.action("exit", async (ctx) => {
 });
 
 // on messages
-bot.hears("text", async (ctx) => {
+bot.on("text", async (ctx) => {
   const { id } = ctx.from;
 
   const messageText = ctx.message?.text || "";
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   if (urlRegex.test(messageText)) {
-    ctx.reply("I see you sent a link! Processing it... 🔄");
-
     const links = messageText.match(urlRegex);
-    if (links?.[0]) {
-      const outputFolder = path.join("downloads", `playlist-${randomUUID()}`);
-      await handleFetchPlayListMedia(links[0], outputFolder).then(async (_) => {
-        await handleSendPlayListZipFile(ctx, outputFolder);
-      });
-    } else
+
+    try {
+      if (links?.[0]) {
+        ctx.reply("I see you sent a link! Processing it... 🔄");
+        const outputFolder = path.join("downloads", `playlist-${randomUUID()}`);
+        await handleFetchPlayListMedia(links[0], outputFolder).then(
+          async (_) => {
+            await handleSendPlayListZipFile(ctx, outputFolder);
+          }
+        );
+      } else
+        ctx.reply(
+          "Uh Oh! Came across an error while processing playlist link 🤖💔 Please send a valid link 😊"
+        );
+    } catch (err) {
       ctx.reply(
         "Uh Oh! Came across an error while processing playlist link 🤖💔 Please send a valid link 😊"
       );
+    }
   } else {
     ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
   }
