@@ -86,7 +86,7 @@ bot.on("text", async (ctx) => {
         const tempDir = "/tmp";
         const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
-        ctx.replyWithDocument(
+        ctx.sendDocument(
           "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip"
         );
 
