@@ -75,7 +75,9 @@ export async function getUserDownloadHistory(id: number) {
     }
   });
 
+  if (user == null) return null;
+
   return await prisma.downloadHistory.findMany({
-    where: { userId: id }
+    where: { userId: user.id }
   });
 }
