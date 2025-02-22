@@ -45,6 +45,8 @@ bot.help(async (ctx) => {
   );
 });
 
+bot.command("menu", (ctx) => ctx.reply("Showing interactive menu"));
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     await bot.handleUpdate(req.body);
