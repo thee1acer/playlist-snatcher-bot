@@ -39,3 +39,41 @@ export async function checkIfUserExists(
     ". Welcome to Playlist Snatcher - your easy to use playlist downloader. How can I help? 😊"
   );
 }
+
+export async function userIsSubscribed(id: number) {
+  const user = await prisma.user.findUnique({
+    where: { telegramId: id.toString() },
+    select: {
+      id: true
+    }
+  });
+
+  const sub = await prisma.userSubscription.findFirst({
+    where: {
+      userId: user?.id
+    }
+  });
+
+  const subscriptionType = await prisma.subscription.findUnique({
+    where: {
+      subscriptionName: sub?.subscriptionStatus
+    }
+  });
+
+  if (sub?.id) return null;
+
+  return { subscription: sub, subscriptionType: subscriptionType };
+}
+
+export async function getUserDownloadHistory(id: number) {
+  const user = await prisma.user.findUnique({
+    where: { telegramId: id.toString() },
+    select: {
+      id: true
+    }
+  });
+
+  return await prisma.downloadHistory.findMany({
+    where: { userId: id }
+  });
+}

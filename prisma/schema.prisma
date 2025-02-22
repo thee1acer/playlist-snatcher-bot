@@ -16,6 +16,7 @@ model User {
   createdAt     DateTime  @default(now())
 
   UserSubscription UserSubscription?
+  DownloadHistory DownloadHistory[]
 }
 
 model UserSubscription {
@@ -33,4 +34,12 @@ model Subscription {
   subscriptionDescription   String
   constOfSub                Int     
   lengthInDays              Int
+}
+
+model DownloadHistory {
+  id              Int       @id @default(autoincrement())
+  downloadUrl     String
+  downloadDate    DateTime  @default(now())
+  userId          Int
+  user            User      @relation(fields: [userId], references: [id])
 }
