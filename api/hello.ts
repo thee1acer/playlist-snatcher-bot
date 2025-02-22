@@ -103,6 +103,7 @@ bot.action("download_playlist", async (ctx) => {
     ctx.editMessageText(
       "Note that first time downloads are free but from then you will need a subscription!"
     );
+    ctx.reply("Send a url of your playlist to download 🤖");
   } else if (userSubscription?.subscription) {
     const subscriptionName =
       userSubscription?.subscriptionType?.subscriptionName;
@@ -123,9 +124,8 @@ bot.action("download_playlist", async (ctx) => {
     ctx.editMessageText(
       `Your have ${totalDaysLeft} days / ${totalSubScriptionDays} left out of your ${subscriptionName}`
     );
+    ctx.reply("Send a url of your playlist to download 🤖");
   }
-
-  ctx.reply("Send a url of your playlist to download 🤖");
 });
 
 bot.action("add_item", (ctx) => {
