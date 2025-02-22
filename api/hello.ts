@@ -70,7 +70,7 @@ bot.action("exit", async (ctx) => {
 });
 
 // on messages
-bot.on("text", async (ctx) => {
+/*bot.on("text", async (ctx) => {
   const { id } = ctx.from;
 
   const messageText = ctx.message?.text || "";
@@ -92,4 +92,4 @@ bot.on("text", async (ctx) => {
   } else {
     ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
   }
-});
+});*/
