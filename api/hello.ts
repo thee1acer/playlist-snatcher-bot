@@ -86,11 +86,12 @@ bot.on("text", async (ctx) => {
         const tempDir = "/tmp";
         const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
-        await handleFetchPlayListMedia(playlistUrl, outputFolder, tempDir).then(
+        await handleFetchPlayListMedia(ctx, playlistUrl, outputFolder, tempDir);
+        /*.then(
           async (_) => {
             await handleSendPlayListZipFile(ctx, outputFolder);
           }
-        );
+        );*/
       } else {
         ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
       }

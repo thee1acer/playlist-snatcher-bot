@@ -2,14 +2,12 @@ import { Context } from "telegraf";
 import { userIsSubscribed } from "../lib/authentication";
 import { getUserDownloadHistory } from "../lib/download";
 
-import YTDlpWrap from "yt-dlp-wrap";
 import fs from "fs";
 import path from "path";
 
 import { put } from "@vercel/blob";
 import { spawn } from "child_process";
-
-const ytDlp = new YTDlpWrap();
+import archiver from "archiver";
 
 export async function handleDownloadPlayListAction(ctx: Context) {
   const { id } = ctx.from!;
@@ -59,10 +57,23 @@ export async function handleDownloadPlayListAction(ctx: Context) {
 }
 
 export async function handleFetchPlayListMedia(
+  ctx: Context,
   playlistUrl: string,
   outputFolder: string,
   tempDir: string
 ) {
+  const { url } = await put("articles/blob.txt", "Hello World!", {
+    access: "public"
+  });
+
+  await ctx.replyWithDocument(
+    "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip",
+    {
+      caption: "Here is your downloaded playlist 🎵"
+    }
+  );
+
+  return;
   console.log("Setting up root directory");
   try {
     await fs.promises.access(tempDir);
@@ -74,8 +85,11 @@ export async function handleFetchPlayListMedia(
   await fs.promises.mkdir(outputFolder, { recursive: true });
 
   console.log("Fetching tracklist");
-  return new Promise((resolve, reject) => {
-    const process = spawn("yt-dlp", [
+
+  const ytDlpPath = path.join(__dirname, "bin", "yt-dlp");
+
+  await new Promise((resolve, reject) => {
+    const process = spawn(ytDlpPath, [
       playlistUrl,
       "-x",
       "--audio-format",
@@ -84,49 +98,60 @@ export async function handleFetchPlayListMedia(
       path.join(outputFolder, "%(title)s.%(ext)s")
     ]);
 
-    process.on("close", async (code) => {
-      if (code === 0) {
-        resolve(outputFolder);
-      } else {
-        reject(new Error("Download failed"));
-      }
+    process.stdout.on("data", (data) => console.log(`yt-dlp: ${data}`));
+    process.stderr.on("data", (data) => console.error(`yt-dlp error: ${data}`));
+
+    process.on("close", (code) => {
+      if (code === 0) resolve(outputFolder);
+      else reject(new Error("Download failed"));
     });
   });
 }
 
 export async function handleSendPlayListZipFile(
-  ctx: any,
+  ctx: Context,
   outputFolder: string
 ) {
   try {
-    console.log(`Reading folder at: ${outputFolder}`);
+    console.log(`Reading files from: ${outputFolder}`);
     const files = await fs.promises.readdir(outputFolder);
-    const uploadedFiles: string[] = [];
 
-    for (const file of files) {
-      const filePath = path.join(outputFolder, file);
-      const fileBuffer = await fs.promises.readFile(filePath);
-
-      const { url } = await put(`playlist/${file}`, fileBuffer, {
-        access: "public"
-      });
-
-      uploadedFiles.push(url);
-      await fs.promises.unlink(filePath); // ✅ Clean up after upload
-    }
-
-    if (uploadedFiles.length === 0) {
-      ctx.reply("⚠ No files found to upload.");
+    if (files.length === 0) {
+      ctx.reply("⚠ No files found.");
       return;
     }
 
-    ctx.reply(
-      `✅ Download complete! Here are your files:\n\n${uploadedFiles.join(
-        "\n"
-      )}`
+    const zipPath = path.join("/tmp", `playlist-${Date.now()}.zip`);
+    console.log("Creating zip archive:", zipPath);
+
+    const zipStream = fs.createWriteStream(zipPath);
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
+    archive.pipe(zipStream);
+    files.forEach((file) => {
+      archive.file(path.join(outputFolder, file), { name: file });
+    });
+
+    await archive.finalize();
+    await new Promise((resolve) => zipStream.on("close", resolve));
+
+    console.log("Uploading zip file...");
+    const zipBuffer = await fs.promises.readFile(zipPath);
+    const { url } = await put(
+      `playlist/playlist-${Date.now()}.zip`,
+      zipBuffer,
+      {
+        access: "public"
+      }
     );
+
+    ctx.reply(`✅ Download complete! Your playlist zip:\n\n${url}`);
+
+    // ✅ Clean up temporary files
+    await fs.promises.rm(outputFolder, { recursive: true, force: true });
+    await fs.promises.unlink(zipPath);
   } catch (error) {
-    console.error("Error uploading files:", error);
-    ctx.reply("❌ Failed to upload files.");
+    console.error("Error uploading zip file:", error);
+    ctx.reply("❌ Failed to upload.");
   }
 }
