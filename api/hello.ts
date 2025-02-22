@@ -4,6 +4,13 @@ import { checkIfUserExists } from "./lib/authentication";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
+bot.telegram.setMyCommands([
+  { command: "start", description: "Start the bot ▶️" },
+  { command: "help", description: "Show help menu ⛑️" },
+  { command: "menu", description: "Show interactive menu 🛒" },
+  { command: "about", description: "About this bot 🤖" }
+]);
+
 // Handle /start command
 bot.start(async (ctx) => {
   const { id, username, first_name, last_name } = ctx.from;
@@ -25,21 +32,7 @@ bot.start(async (ctx) => {
   );
 });
 
-bot.action("view_list", (ctx) => {
-  ctx.answerCbQuery(); // Prevents "loading" effect
-  ctx.reply("Here is your list...");
-});
-
-bot.action("add_item", (ctx) => {
-  ctx.answerCbQuery();
-  ctx.reply("Send me the item you want to add.");
-});
-
-bot.action("exit", (ctx) => {
-  ctx.answerCbQuery();
-  ctx.reply("Goodbye! 👋");
-});
-
+// Handle /help command
 bot.help(async (ctx) => {
   const { id, username, first_name, last_name, is_premium, is_bot } = ctx.from;
 
@@ -50,6 +43,25 @@ bot.help(async (ctx) => {
       [Markup.button.callback("❌ Exit", "exit")]
     ])
   );
+});
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === "POST") {
+    await bot.handleUpdate(req.body);
+    return res.status(200).send("OK");
+  }
+  res.status(405).send("Method Not Allowed");
+}
+
+//actions
+bot.action("view_list", (ctx) => {
+  ctx.editMessageText("Here is your list");
+  //ctx.reply("Here is your list...");
+});
+
+bot.action("add_item", (ctx) => {
+  ctx.answerCbQuery();
+  ctx.reply("Send me the item you want to add.");
 });
 
 bot.action("view_bot_docs", (ctx) => {
@@ -63,11 +75,3 @@ bot.action("exit", (ctx) => {
   ctx.answerCbQuery();
   ctx.reply("Goodbye! 👋");
 });
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === "POST") {
-    await bot.handleUpdate(req.body);
-    return res.status(200).send("OK");
-  }
-  res.status(405).send("Method Not Allowed");
-}
