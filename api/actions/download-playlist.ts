@@ -63,7 +63,7 @@ export async function handleFetchPlayListMedia(
   outputFolder: string
 ) {
   console.log("Setting up directory");
-  fs.mkdirSync(outputFolder, { recursive: true });
+  await fs.promises.mkdir(outputFolder, { recursive: true });
   console.log("Fetching tracklist");
 
   return new Promise((resolve, reject) => {
