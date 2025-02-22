@@ -14,7 +14,7 @@ export async function checkIfUserExists(
 
   //if user exists
   if (user) {
-    return "Welcome back" + firstName + ". How can I help? 😊";
+    return "Welcome back " + firstName + ". How can I help? 😊";
   }
 
   //else if user is using bot for the first time
@@ -36,6 +36,6 @@ export async function checkIfUserExists(
   return (
     "Hello " +
     firstName +
-    ". Welcom to Playlist Snatcher - your easy to user playlist downloader. How can I help? 😊"
+    ". Welcome to Playlist Snatcher - your easy to use playlist downloader. How can I help? 😊"
   );
 }
