@@ -3,7 +3,6 @@ import { userIsSubscribed } from "../lib/authentication";
 import { getUserDownloadHistory } from "../lib/download";
 
 export async function handleDownloadPlayListAction(ctx: Context) {
-  //check if user has subscription and is active
   const { id } = ctx.from!;
   const userSubscription = await userIsSubscribed(id);
   const downloadHistory = await getUserDownloadHistory(id);
@@ -20,10 +19,11 @@ export async function handleDownloadPlayListAction(ctx: Context) {
     userSubscription?.subscription == null &&
     downloadHistory?.length == 0
   ) {
-    ctx.editMessageText(
-      "Note that first time downloads are free but from then you will need a subscription!"
-    );
-    ctx.reply("Send a url of your playlist to download 🤖");
+    await ctx
+      .editMessageText(
+        "Note that first time downloads are free but from then you will need a subscription!"
+      )
+      .then((_) => ctx.reply("Send a url of your playlist to download 🤖"));
   } else if (userSubscription?.subscription) {
     const subscriptionName =
       userSubscription?.subscriptionType?.subscriptionName;
@@ -41,9 +41,10 @@ export async function handleDownloadPlayListAction(ctx: Context) {
           )
         : null;
 
-    ctx.editMessageText(
-      `Your have ${totalDaysLeft} days / ${totalSubScriptionDays} left out of your ${subscriptionName}`
-    );
-    ctx.reply("Send a url of your playlist to download 🤖");
+    await ctx
+      .editMessageText(
+        `Your have ${totalDaysLeft} days / ${totalSubScriptionDays} left out of your ${subscriptionName}`
+      )
+      .then((_) => ctx.reply("Send a url of your playlist to download 🤖"));
   }
 }
