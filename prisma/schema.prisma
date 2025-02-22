@@ -8,10 +8,29 @@ datasource db {
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  telegramId String  @unique
-  username  String?
-  firstName String
-  lastName String
-  createdAt DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  telegramId    String    @unique
+  username      String?
+  firstName     String
+  lastName      String
+  createdAt     DateTime  @default(now())
+
+  UserSubscription UserSubscription?
+}
+
+model UserSubscription {
+  id                    Int       @id @default(autoincrement())
+  subscriptionStatus    String
+  activationDate        DateTime? 
+  expiryDate            DateTime? 
+  userId                Int       @unique
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                        Int     @id @default(autoincrement())
+  subscriptionName          String  
+  subscriptionDescription   String
+  constOfSub                Int     
+  lengthInDays              Int
 }
