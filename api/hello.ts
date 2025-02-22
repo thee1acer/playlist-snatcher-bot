@@ -1,11 +1,12 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { Telegraf, Markup } from "telegraf";
+import { checkIfUserExists, userIsSubscribed } from "./lib/authentication";
 import {
-  checkIfUserExists,
   getUserDownloadHistory,
-  getUserDownloadHistoryByHistoryId,
-  userIsSubscribed
-} from "./lib/authentication";
+  getUserDownloadHistoryByHistoryId
+} from "./lib/download";
+import { handleStartCommand } from "./commands/about";
+import { handleExitAction } from "./actions/exit";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
@@ -18,28 +19,7 @@ bot.telegram.setMyCommands([
 
 // Handle /start command
 bot.start(async (ctx) => {
-  const { id, username, first_name, last_name } = ctx.from;
-
-  const greeting = await checkIfUserExists(
-    id,
-    username ?? id.toString(),
-    first_name,
-    last_name ?? ""
-  );
-
-  ctx.reply(
-    greeting,
-    Markup.inlineKeyboard([
-      [Markup.button.callback("👨‍💻 Download a playlist", "download_playlist")],
-      [
-        Markup.button.callback(
-          "🧾 View download history",
-          "view_download_history"
-        )
-      ],
-      [Markup.button.callback("❌ End chat", "exit")]
-    ])
-  );
+  await handleStartCommand(ctx);
 });
 
 // Handle /help command
@@ -134,7 +114,7 @@ bot.action("view_download_history", async (ctx) => {
 
   const downloadHistory = await getUserDownloadHistory(id);
 
-  if (downloadHistory == null)
+  if (downloadHistory == null || (downloadHistory?.length ?? 0) === 0)
     ctx.editMessageText(
       "Uh Oh! You do not have any existing download history 😣😭"
     );
@@ -185,8 +165,8 @@ bot.action("view_bot_docs", (ctx) => {
   );
 });
 
-bot.action("exit", (ctx) => {
-  ctx.editMessageText("Goodbye! 👋");
+bot.action("exit", async (ctx) => {
+  await handleExitAction(ctx);
 });
 
 // on messages
