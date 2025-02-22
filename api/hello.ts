@@ -82,7 +82,13 @@ bot.on("text", async (ctx) => {
     try {
       if (links?.[0]) {
         ctx.reply("I see you sent a link! Processing it... 🔄");
-        const outputFolder = path.join("downloads", `playlist-${randomUUID()}`);
+
+        const downloadsDir = path.join(__dirname, "downloads");
+        const outputFolder = path.join(
+          downloadsDir,
+          `playlist-${randomUUID()}`
+        );
+
         await handleFetchPlayListMedia(links[0], outputFolder).then(
           async (_) => {
             await handleSendPlayListZipFile(ctx, outputFolder);

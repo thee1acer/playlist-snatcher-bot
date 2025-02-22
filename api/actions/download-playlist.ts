@@ -64,26 +64,35 @@ export async function handleFetchPlayListMedia(
   if (!fs.existsSync(outputFolder)) {
     console.log(`Creating folder at ${outputFolder}`);
     fs.mkdirSync(outputFolder, { recursive: true });
+    console.log(`Done creating folder at ${outputFolder}`);
   }
 
-  return new Promise((resolve, reject) => {
-    ytDlp
-      .exec([
-        playlistUrl,
-        "-x",
-        "--audio-format",
-        "mp3",
-        "-o",
-        path.join(outputFolder, "%(title)s.%(ext)s")
-      ])
-      .on("progress", (progress) => {
-        console.log(`Downloading: ${progress.percent}%`);
-      })
-      .on("close", (code) => {
-        if (code === 0) resolve(outputFolder);
-        else reject(new Error("Download failed"));
-      });
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      ytDlp
+        .exec([
+          playlistUrl,
+          "-x",
+          "--audio-format",
+          "mp3",
+          "-o",
+          path.join(outputFolder, "%(title)s.%(ext)s")
+        ])
+        .on("progress", (progress) => {
+          console.log(`Downloading: ${progress.percent}%`);
+        })
+        .on("close", (code) => {
+          if (code === 0) {
+            resolve(outputFolder);
+          } else {
+            reject(new Error("Download failed"));
+          }
+        });
+    });
+  } catch (err) {
+    console.error("Error downloading playlist:", err);
+    throw err;
+  }
 }
 
 export async function handleSendPlayListZipFile(
@@ -96,14 +105,18 @@ export async function handleSendPlayListZipFile(
     const uploadedFiles: string[] = [];
 
     for (const file of files) {
-      const filePath = path.join(outputFolder, file);
-      const fileBuffer = await fs.promises.readFile(filePath);
+      try {
+        const filePath = path.join(outputFolder, file);
+        const fileBuffer = await fs.promises.readFile(filePath);
 
-      const { url } = await put(`playlist/${file}`, fileBuffer, {
-        access: "public"
-      });
+        const { url } = await put(`playlist/${file}`, fileBuffer, {
+          access: "public"
+        });
 
-      uploadedFiles.push(url);
+        uploadedFiles.push(url);
+      } catch (fileError) {
+        console.error(`Error uploading file ${file}:`, fileError);
+      }
     }
 
     if (uploadedFiles.length === 0) {
