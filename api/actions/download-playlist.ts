@@ -62,10 +62,6 @@ export async function handleFetchPlayListMedia(
   outputFolder: string,
   tempDir: string
 ) {
-  const { url } = await put("articles/blob.txt", "Hello World!", {
-    access: "public"
-  });
-
   await ctx.replyWithDocument(
     "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip",
     {
