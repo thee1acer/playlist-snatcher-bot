@@ -10,6 +10,11 @@ import { handleExitAction } from "./actions/exit";
 import { handleHelpCommand } from "./commands/help";
 import { handleAboutCommand } from "./commands/about";
 import { handleInteractiveMenuCommand } from "./commands/menu";
+import { handleDownloadPlayListAction } from "./actions/download_playlist";
+import {
+  handleViewAllDownloadHistory,
+  handleViewDownloadHistoryById
+} from "./actions/view_download_history";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
@@ -36,100 +41,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 //actions
-bot.action("download_playlist", async (ctx) => {
-  //check if user has subscription and is active
-  const { id } = ctx.from;
-  const userSubscription = await userIsSubscribed(id);
-  const downloadHistory = await getUserDownloadHistory(id);
+bot.action(
+  "download_playlist",
+  async (ctx) => await handleDownloadPlayListAction(ctx)
+);
 
-  if (
-    userSubscription?.subscription == null &&
-    downloadHistory != null &&
-    downloadHistory.length > 0
-  ) {
-    ctx.editMessageText(
-      "You have exceed the free qouta😣.\n\n Need help setting up your subscription? 🤖"
-    );
-  } else if (
-    userSubscription?.subscription == null &&
-    downloadHistory?.length == 0
-  ) {
-    ctx.editMessageText(
-      "Note that first time downloads are free but from then you will need a subscription!"
-    );
-    ctx.reply("Send a url of your playlist to download 🤖");
-  } else if (userSubscription?.subscription) {
-    const subscriptionName =
-      userSubscription?.subscriptionType?.subscriptionName;
-    const totalSubScriptionDays =
-      userSubscription?.subscriptionType?.lengthInDays;
-    const totalDaysLeft =
-      userSubscription?.subscription.expiryDate &&
-      userSubscription?.subscription.activationDate
-        ? Math.ceil(
-            (new Date(userSubscription.subscription.expiryDate).getTime() -
-              new Date(
-                userSubscription.subscription.activationDate
-              ).getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        : null;
+bot.action(
+  "view_download_history",
+  async (ctx) => await handleViewAllDownloadHistory(ctx)
+);
 
-    ctx.editMessageText(
-      `Your have ${totalDaysLeft} days / ${totalSubScriptionDays} left out of your ${subscriptionName}`
-    );
-    ctx.reply("Send a url of your playlist to download 🤖");
-  }
-});
-
-bot.action("view_download_history", async (ctx) => {
-  const { id } = ctx.from;
-
-  const downloadHistory = await getUserDownloadHistory(id);
-
-  if (downloadHistory == null || (downloadHistory?.length ?? 0) === 0)
-    ctx.editMessageText(
-      "Uh Oh! You do not have any existing download history 😣😭"
-    );
-  else {
-    ctx.reply(
-      "Here is your download history:",
-      Markup.inlineKeyboard(
-        downloadHistory.map((download) =>
-          Markup.button.callback(
-            `${download.downloadUrl}`,
-            `view_history:${download.id}`
-          )
-        )
-      )
-    );
-  }
-});
 bot.action(/^view_history:(\d+)$/, async (ctx) => {
   const downloadId = ctx.match[1];
-  const history = await getUserDownloadHistoryByHistoryId(downloadId);
-
-  if (history == null) ctx.reply("Uh Oh! Issue getting Download history 🤖");
-  else {
-    const formattedDate = new Date(history.downloadDate).toLocaleDateString(
-      "en-US",
-      {
-        year: "numeric",
-        month: "short",
-        day: "2-digit"
-      }
-    );
-    ctx.reply(`📅 Date: ${formattedDate}`);
-
-    ctx.reply(
-      `History: \n\n\t Download ID: ${history.id} \n\t Download History: ${history.downloadUrl} \n\t Download Date: ${formattedDate}`
-    );
-  }
-});
-
-bot.action("add_item", (ctx) => {
-  ctx.answerCbQuery();
-  ctx.reply("Send me the item you want to add.");
+  await handleViewDownloadHistoryById(ctx, downloadId);
 });
 
 bot.action("view_bot_docs", (ctx) => {
