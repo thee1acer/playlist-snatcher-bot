@@ -62,6 +62,7 @@ export async function handleFetchPlayListMedia(
   outputFolder: string
 ) {
   if (!fs.existsSync(outputFolder)) {
+    console.log(`Creating folder at ${outputFolder}`);
     fs.mkdirSync(outputFolder, { recursive: true });
   }
 
@@ -90,6 +91,7 @@ export async function handleSendPlayListZipFile(
   outputFolder: string
 ) {
   try {
+    console.log(`Reading folder at: ${outputFolder}`);
     const files = await fs.promises.readdir(outputFolder);
     const uploadedFiles: string[] = [];
 
