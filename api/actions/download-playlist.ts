@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 
 import { put } from "@vercel/blob";
+import { spawn } from "child_process";
 
 const ytDlp = new YTDlpWrap();
 
@@ -61,46 +62,32 @@ export async function handleFetchPlayListMedia(
   playlistUrl: string,
   outputFolder: string
 ) {
-  const { url } = await put("downloads/blob.txt", "Hello World!", {
-    access: "public"
-  });
+  console.log("Setting up directory");
+  fs.mkdirSync(outputFolder, { recursive: true });
+  console.log("Fetching tracklist");
 
-  if (!fs.existsSync(outputFolder)) {
-    console.log(`Creating folder at ${outputFolder}`);
-    fs.mkdirSync(outputFolder, { recursive: true });
-    console.log(`Done creating folder at ${outputFolder}`);
-  }
+  return new Promise((resolve, reject) => {
+    const process = spawn("yt-dlp", [
+      playlistUrl,
+      "-x",
+      "--audio-format",
+      "mp3",
+      "-o",
+      path.join(outputFolder, "%(title)s.%(ext)s")
+    ]);
 
-  try {
-    await new Promise((resolve, reject) => {
-      ytDlp
-        .exec([
-          playlistUrl,
-          "-x",
-          "--audio-format",
-          "mp3",
-          "-o",
-          path.join(outputFolder, "%(title)s.%(ext)s")
-        ])
-        .on("progress", (progress) => {
-          console.log(`Downloading: ${progress.percent}%`);
-        })
-        .on("close", (code) => {
-          if (code === 0) {
-            resolve(outputFolder);
-          } else {
-            reject(new Error("Download failed"));
-          }
-        });
+    process.on("close", async (code) => {
+      if (code === 0) {
+        resolve(outputFolder);
+      } else {
+        reject(new Error("Download failed"));
+      }
     });
-  } catch (err) {
-    console.error("Error downloading playlist:", err);
-    throw err;
-  }
+  });
 }
 
 export async function handleSendPlayListZipFile(
-  ctx: Context,
+  ctx: any,
   outputFolder: string
 ) {
   try {
@@ -109,18 +96,15 @@ export async function handleSendPlayListZipFile(
     const uploadedFiles: string[] = [];
 
     for (const file of files) {
-      try {
-        const filePath = path.join(outputFolder, file);
-        const fileBuffer = await fs.promises.readFile(filePath);
+      const filePath = path.join(outputFolder, file);
+      const fileBuffer = await fs.promises.readFile(filePath);
 
-        const { url } = await put(`playlist/${file}`, fileBuffer, {
-          access: "public"
-        });
+      const { url } = await put(`playlist/${file}`, fileBuffer, {
+        access: "public"
+      });
 
-        uploadedFiles.push(url);
-      } catch (fileError) {
-        console.error(`Error uploading file ${file}:`, fileError);
-      }
+      uploadedFiles.push(url);
+      await fs.promises.unlink(filePath); // ✅ Clean up after upload
     }
 
     if (uploadedFiles.length === 0) {

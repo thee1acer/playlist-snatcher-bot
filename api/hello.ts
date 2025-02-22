@@ -77,25 +77,22 @@ bot.on("text", async (ctx) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   if (urlRegex.test(messageText)) {
-    const links = messageText.match(urlRegex);
-
     try {
+      const links = messageText.match(urlRegex);
       if (links?.[0]) {
-        ctx.reply("I see you sent a link! Processing it... 🔄");
+        ctx.reply("Processing... 🔄");
 
-        const downloadsDir = path.join(__dirname, "downloads");
-        const outputFolder = path.join(
-          downloadsDir,
-          `playlist-${randomUUID()}`
-        );
+        const playlistUrl = links[0];
+        const outputFolder = `tmp/playlist-${randomUUID()}/`;
 
-        await handleFetchPlayListMedia(links[0], outputFolder).then(
+        await handleFetchPlayListMedia(playlistUrl, outputFolder).then(
           async (_) => {
             await handleSendPlayListZipFile(ctx, outputFolder);
           }
         );
-      } else
+      } else {
         ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
+      }
     } catch (err) {
       ctx.reply(
         "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
