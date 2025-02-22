@@ -86,8 +86,15 @@ bot.on("text", async (ctx) => {
         const tempDir = "/tmp";
         const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
-        await handleFetchPlayListMedia(ctx, playlistUrl, outputFolder, tempDir);
-        /*.then(
+        await ctx.replyWithDocument(
+          "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip",
+          {
+            caption: "Here is your downloaded playlist 🎵"
+          }
+        );
+
+        /*await handleFetchPlayListMedia(ctx, playlistUrl, outputFolder, tempDir);
+        .then(
           async (_) => {
             await handleSendPlayListZipFile(ctx, outputFolder);
           }
