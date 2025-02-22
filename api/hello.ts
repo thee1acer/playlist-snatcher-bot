@@ -88,7 +88,11 @@ bot.action("download_playlist", async (ctx) => {
   const userSubscription = await userIsSubscribed(id);
   const downloadHistory = await getUserDownloadHistory(id);
 
-  if (userSubscription?.subscription == null && downloadHistory?.length > 0) {
+  if (
+    userSubscription?.subscription == null &&
+    downloadHistory != null &&
+    downloadHistory.length > 0
+  ) {
     ctx.editMessageText(
       "You have exceed the free qouta😣.\n\n Need help setting up your subscription? 🤖"
     );
