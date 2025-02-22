@@ -95,12 +95,10 @@ bot.on("text", async (ctx) => {
           }
         );
       } else
-        ctx.reply(
-          "Uh Oh! Came across an error while processing playlist link 🤖💔 Please send a valid link 😊"
-        );
+        ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
     } catch (err) {
       ctx.reply(
-        "Uh Oh! Came across an error while processing playlist link 🤖💔 Please send a valid link 😊"
+        "Uh Oh! Came across an error while processing playlist link 🤖 Please try again later.. "
       );
     }
   } else {
