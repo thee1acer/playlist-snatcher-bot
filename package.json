@@ -5,6 +5,7 @@
   "devDependencies": {
     "@types/node": "^17.0.42",
     "@vercel/node": "^2.9.6",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
   "dependencies": {
@@ -13,7 +14,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "prisma": "^6.4.1",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "yt-dlp-wrap": "^2.3.12"
   },
   "scripts": {
     "build": "prisma generate",

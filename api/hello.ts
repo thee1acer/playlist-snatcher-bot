@@ -1,20 +1,23 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { Telegraf, Markup } from "telegraf";
-import { checkIfUserExists, userIsSubscribed } from "./lib/authentication";
-import {
-  getUserDownloadHistory,
-  getUserDownloadHistoryByHistoryId
-} from "./lib/download";
+import { Telegraf } from "telegraf";
 import { handleStartCommand } from "./commands/start";
 import { handleExitAction } from "./actions/exit";
 import { handleHelpCommand } from "./commands/help";
 import { handleAboutCommand } from "./commands/about";
 import { handleInteractiveMenuCommand } from "./commands/menu";
-import { handleDownloadPlayListAction } from "./actions/download_playlist";
+import {
+  handleDownloadPlayListAction,
+  handleFetchPlayListMedia,
+  handleSendPlayListZipFile
+} from "./actions/download-playlist";
 import {
   handleViewAllDownloadHistory,
   handleViewDownloadHistoryById
-} from "./actions/view_download_history";
+} from "./actions/view-download-history";
+
+import { randomUUID } from "crypto";
+
+import path from "path";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
@@ -67,19 +70,25 @@ bot.action("exit", async (ctx) => {
 });
 
 // on messages
-bot.on("text", (ctx) => {
-  const messageText = ctx.message?.text || "";
+bot.on("text", async (ctx) => {
+  const { id } = ctx.from;
 
+  const messageText = ctx.message?.text || "";
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   if (urlRegex.test(messageText)) {
     ctx.reply("I see you sent a link! Processing it... 🔄");
 
     const links = messageText.match(urlRegex);
-    console.log("User sent links:", links);
-
-    // Example: Call a function to process the link
-    // processLink(links[0]);
+    if (links?.[0]) {
+      const outputFolder = path.join("downloads", `playlist-${randomUUID()}`);
+      await handleFetchPlayListMedia(links[0], outputFolder).then(async (_) => {
+        await handleSendPlayListZipFile(ctx, outputFolder);
+      });
+    } else
+      ctx.reply(
+        "Uh Oh! Came across an error while processing playlist link 🤖💔 Please send a valid link 😊"
+      );
   } else {
     ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
   }
