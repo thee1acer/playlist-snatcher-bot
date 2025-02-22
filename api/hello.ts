@@ -4,6 +4,11 @@ import { Telegraf } from "telegraf";
 // Initialize the bot
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
+// Handle /start command
+bot.start((ctx) => {
+  ctx.reply("Hello and welcome! 😊");
+});
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "POST") {
     await bot.handleUpdate(req.body); // Process Telegram update
