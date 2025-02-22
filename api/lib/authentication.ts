@@ -54,13 +54,15 @@ export async function userIsSubscribed(id: number) {
     }
   });
 
-  const subscriptionType = await prisma.subscription.findUnique({
-    where: {
-      subscriptionName: sub?.subscriptionStatus
-    }
-  });
+  const subscriptionType = sub
+    ? await prisma.subscription.findUnique({
+        where: {
+          subscriptionName: sub.subscriptionStatus
+        }
+      })
+    : null;
 
-  if (sub?.id) return null;
+  if (sub == null) return null;
 
   return { subscription: sub, subscriptionType: subscriptionType };
 }
