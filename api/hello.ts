@@ -18,7 +18,6 @@ import {
 import { randomUUID } from "crypto";
 
 import path from "path";
-import fetch from "node-fetch";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
@@ -87,7 +86,7 @@ bot.on("text", async (ctx) => {
         const tempDir = "/tmp";
         const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
-        await fetch(
+        /*await fetch(
           "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip"
         )
           .then((res) => res.buffer())
@@ -100,7 +99,7 @@ bot.on("text", async (ctx) => {
           .catch((err) => {
             console.error("Failed to fetch file:", err);
             ctx.reply("❌ Failed to send the file.");
-          });
+          });*/
       } else {
         ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
       }
