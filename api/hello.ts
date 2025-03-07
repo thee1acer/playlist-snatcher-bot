@@ -104,6 +104,8 @@ bot.on("text", async (ctx) => {
             ? parseInt(contentLength, 10) / (1024 * 1024)
             : 0;
 
+          console.log({ styling: fileSizeMB });
+
           if (fileSizeMB > 50) {
             ctx.reply(
               `File size is greater than 50mbs. Here is your download link: ${signedURL}`
