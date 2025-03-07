@@ -18,6 +18,8 @@ import {
 import { randomUUID } from "crypto";
 
 import path from "path";
+import fetch from "node-fetch";
+import { Readable } from "stream";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
@@ -82,24 +84,30 @@ bot.on("text", async (ctx) => {
       if (links?.[0]) {
         ctx.reply("Processing... 🔄");
 
-        const playlistUrl = links[0];
-        const tempDir = "/tmp";
-        const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
+        //const playlistUrl = links[0];
+        //const tempDir = "/tmp";
+        //const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
-        /*await fetch(
-          "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip"
-        )
-          .then((res) => res.buffer())
-          .then((fileBuffer) => {
-            ctx.replyWithDocument(
-              { source: fileBuffer, filename: "apktool.zip" },
-              { caption: "Here is your file 📂" }
-            );
-          })
-          .catch((err) => {
-            console.error("Failed to fetch file:", err);
-            ctx.reply("❌ Failed to send the file.");
-          });*/
+        try {
+          const response = await fetch(
+            "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip"
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const fileBuffer = Buffer.from(await response.arrayBuffer());
+          const fileStream = Readable.from(fileBuffer);
+
+          await ctx.replyWithDocument(
+            { source: fileStream, filename: "apktool.zip" },
+            { caption: "Here is your file 📂" }
+          );
+        } catch (err) {
+          console.error("Failed to fetch file:", err);
+          await ctx.reply("❌ Failed to send the file.");
+        }
       } else {
         ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
       }
