@@ -15,12 +15,6 @@ import {
   handleViewDownloadHistoryById
 } from "./actions/view-download-history";
 
-import { randomUUID } from "crypto";
-
-import path from "path";
-
-import { Readable } from "stream";
-
 const bot = new Telegraf(process.env.BOT_TOKEN!);
 
 bot.telegram.setMyCommands([
@@ -74,69 +68,24 @@ bot.action("exit", async (ctx) => {
 // on messages
 bot.on("text", async (ctx) => {
   const { id } = ctx.from;
-
   const messageText = ctx.message?.text || "";
   const urlRegex = /(https?:\/\/[^\s]+)/g;
 
   if (urlRegex.test(messageText)) {
-    try {
-      const links = messageText.match(urlRegex);
-      if (links?.[0]) {
-        ctx.reply("Processing... 🔄");
-
-        //const playlistUrl = links[0];
-        //const tempDir = "/tmp";
-        //const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
-
-        try {
-          const signedURL =
-            //"https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/blob-BSiLYXepyTmRXzsivYKBm7r8pIpMwZ.txt";
-            "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip";
-
-          const response = await fetch(signedURL);
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const contentLength = response.headers.get("content-length");
-          const fileSizeMB = contentLength
-            ? parseInt(contentLength, 10) / (1024 * 1024)
-            : 0;
-
-          console.log({ styling: fileSizeMB });
-
-          if (fileSizeMB > 50) {
-            ctx.reply(
-              `File size is greater than 50mbs. Here is your download link: ${signedURL}`
-            );
-          } else {
-            const fileBuffer = Buffer.from(await response.arrayBuffer());
-            const fileStream = Readable.from(fileBuffer);
-
-            const fileExtension = signedURL.split(".").pop();
-
-            await ctx.replyWithDocument(
-              {
-                source: fileStream,
-                filename: `file.${fileExtension}`
-              },
-              { caption: "Here is your file 📂" }
-            );
-          }
-        } catch (err) {
-          console.error("Failed to fetch file:", err);
-          await ctx.reply("❌ Failed to send the file.");
-        }
-      } else {
-        ctx.reply("Uh Oh! Invalid Link 🤖💔\n\n Please send a valid link 😊");
-      }
-    } catch (err) {
-      ctx.reply(
-        `Uh Oh! Came across an error while processing playlist link 🤖\n\n ${err}\n\n Please try again later.. `
-      );
+    const playlistUrl = messageText.match(urlRegex)?.[0];
+    if (playlistUrl === null || playlistUrl === undefined) {
+      ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
+      return;
     }
-  } else {
-    ctx.reply("That doesn't seem to be a link. Send me a URL to proceed! 🔗");
+
+    ctx.reply("Processing... 🔄");
+
+    await handleFetchPlayListMedia(ctx, playlistUrl).then(
+      async (outputFolder) => {
+        if (outputFolder) {
+          await handleSendPlayListZipFile(ctx, outputFolder);
+        }
+      }
+    );
   }
 });

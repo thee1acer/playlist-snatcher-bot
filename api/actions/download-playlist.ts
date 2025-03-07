@@ -9,6 +9,9 @@ import { put } from "@vercel/blob";
 import { spawn } from "child_process";
 import archiver from "archiver";
 
+import { randomUUID } from "crypto";
+import { Readable } from "stream";
+
 export async function handleDownloadPlayListAction(ctx: Context) {
   const { id } = ctx.from!;
   const userSubscription = await userIsSubscribed(id);
@@ -58,21 +61,31 @@ export async function handleDownloadPlayListAction(ctx: Context) {
 
 export async function handleFetchPlayListMedia(
   ctx: Context,
-  playlistUrl: string,
-  outputFolder: string,
-  tempDir: string
+  playlistUrl: string
 ) {
-  console.log("Setting up root directory");
+  const tempDir = "/tmp";
+  const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
+
   try {
     await fs.promises.access(tempDir);
   } catch {
-    await fs.promises.mkdir(tempDir, { recursive: true });
+    await ctx
+      .reply("Failed to access temporary directory, let's create it.. 😊👨‍💻")
+      .then(async (_) => {
+        await fs.promises.mkdir(tempDir, { recursive: true });
+      })
+      .catch(async (_) => {
+        await ctx.reply("Failed to create temporary directory 😣");
+        return;
+      });
   }
 
-  console.log("Setting up output directory");
-  await fs.promises.mkdir(outputFolder, { recursive: true });
-
-  console.log("Fetching tracklist");
+  try {
+    await fs.promises.mkdir(outputFolder, { recursive: true });
+  } catch {
+    await ctx.reply("Failed to create output directory 😣");
+    return;
+  }
 
   const ytDlpPath = path.join(__dirname, "bin", "yt-dlp");
 
@@ -94,6 +107,8 @@ export async function handleFetchPlayListMedia(
       else reject(new Error("Download failed"));
     });
   });
+
+  return "";
 }
 
 export async function handleSendPlayListZipFile(
@@ -141,5 +156,46 @@ export async function handleSendPlayListZipFile(
   } catch (error) {
     console.error("Error uploading zip file:", error);
     ctx.reply("❌ Failed to upload.");
+  }
+}
+
+export async function SendFile(ctx: Context) {
+  try {
+    const signedURL =
+      //"https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/blob-BSiLYXepyTmRXzsivYKBm7r8pIpMwZ.txt";
+      "https://9dbsrzxknugap8tb.public.blob.vercel-storage.com/downloads/apktool-XxfgjqNnldK277fbdlI7H4OOb7qvRo.zip";
+
+    const response = await fetch(signedURL);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const contentLength = response.headers.get("content-length");
+    const fileSizeMB = contentLength
+      ? parseInt(contentLength, 10) / (1024 * 1024)
+      : 0;
+
+    if (fileSizeMB > 50) {
+      ctx.reply(
+        `File size is greater than 50mbs. Here is your download link: ${signedURL}`
+      );
+    } else {
+      const fileBuffer = Buffer.from(await response.arrayBuffer());
+      const fileStream = Readable.from(fileBuffer);
+
+      const fileExtension = signedURL.split(".").pop();
+
+      await ctx.replyWithDocument(
+        {
+          source: fileStream,
+          filename: `file.${fileExtension}`
+        },
+        { caption: "Here is your file 📂" }
+      );
+    }
+  } catch (err) {
+    console.error("Failed to fetch file:", err);
+    await ctx.reply("❌ Failed to send the file.");
   }
 }
