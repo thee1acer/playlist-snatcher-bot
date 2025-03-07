@@ -18,7 +18,7 @@ import {
 import { randomUUID } from "crypto";
 
 import path from "path";
-import fetch from "node-fetch";
+
 import { Readable } from "stream";
 
 const bot = new Telegraf(process.env.BOT_TOKEN!);
