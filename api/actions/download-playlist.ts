@@ -87,26 +87,10 @@ export async function handleFetchPlayListMedia(
     return;
   }
 
-  const ytDlpPath = path.join(__dirname, "bin", "yt-dlp");
+  const response = await fetch(playlistUrl);
 
-  await new Promise((resolve, reject) => {
-    const process = spawn(ytDlpPath, [
-      playlistUrl,
-      "-x",
-      "--audio-format",
-      "mp3",
-      "-o",
-      path.join(outputFolder, "%(title)s.%(ext)s")
-    ]);
-
-    process.stdout.on("data", (data) => console.log(`yt-dlp: ${data}`));
-    process.stderr.on("data", (data) => console.error(`yt-dlp error: ${data}`));
-
-    process.on("close", (code) => {
-      if (code === 0) resolve(outputFolder);
-      else reject(new Error("Download failed"));
-    });
-  });
+  console.log({ response: response });
+  ctx.reply(`${response}`);
 
   return "";
 }

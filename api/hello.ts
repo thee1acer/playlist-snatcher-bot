@@ -80,12 +80,13 @@ bot.on("text", async (ctx) => {
 
     ctx.reply("Processing... 🔄");
 
-    /*await handleFetchPlayListMedia(ctx, playlistUrl).then(
+    await handleFetchPlayListMedia(ctx, playlistUrl).then(
       async (outputFolder) => {
-        if (outputFolder) {
-          await handleSendPlayListZipFile(ctx, outputFolder);
-        }
+        return;
+        //if (outputFolder) {
+        //await handleSendPlayListZipFile(ctx, outputFolder);
+        //}
       }
-    );*/
+    );
   }
 });
