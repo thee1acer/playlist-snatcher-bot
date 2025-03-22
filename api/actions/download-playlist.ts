@@ -87,10 +87,8 @@ export async function handleFetchPlayListMedia(
     return;
   }
 
-  const response = await fetch(playlistUrl);
-
-  console.log({ response: response });
-  ctx.reply(`${response}`);
+  //const response = await fetch(playlistUrl);
+  console.log({ response: outputFolder });
 
   return "";
 }
