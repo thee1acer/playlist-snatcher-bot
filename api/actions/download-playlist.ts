@@ -149,7 +149,12 @@ export async function handleFetchPlayListMedia(
     fullPlayList: fullPlayList
   };
 
-  console.log({ results: results });
+  console.log({
+    results: data,
+    results0: data?.twoColumnWatchNextResults,
+    results1: data?.twoColumnWatchNextResults?.playlist,
+    results2: data?.twoColumnWatchNextResults?.playlist?.playlist
+  });
 
   ctx.reply("Done!");
   return outputFolder;
