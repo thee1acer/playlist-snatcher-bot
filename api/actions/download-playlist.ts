@@ -177,7 +177,7 @@ export async function handleFetchPlayListMedia(
   await ctx.replyWithAnimation(
     {
       url: process.env.LOADING_GIF!.toString(),
-      filename: "Loading GIF"
+      filename: "Loading_GIF.gif"
     },
     { caption: testMessage, parse_mode: "Markdown" }
   );
