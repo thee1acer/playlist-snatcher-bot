@@ -9,7 +9,10 @@ import archiver from "archiver";
 
 import { randomUUID } from "crypto";
 
-import getRequestParams from "../lib/get-req-params";
+import {
+  getPlaylistHeaderParams,
+  getPlaylistItemHeaderParams
+} from "../lib/get-req-params";
 import { Readable } from "stream";
 
 export async function handlePlayListDownloadRequest(ctx: Context) {
@@ -87,11 +90,13 @@ export async function handleFetchPlayListMedia(
     return;
   }
 
-  const REQ_BODY = JSON.stringify(getRequestParams(playlistUrl));
+  const REQ_PLAYLIST_BODY = JSON.stringify(
+    getPlaylistHeaderParams(playlistUrl)
+  );
 
-  const response = await fetch(`${process.env.YT_API}`, {
+  const response = await fetch(`${process.env.YT_NEXT_API}`, {
     method: "POST",
-    body: REQ_BODY
+    body: REQ_PLAYLIST_BODY
   });
 
   const contentEncoding = response.headers.get("content-encoding");
@@ -108,6 +113,7 @@ export async function handleFetchPlayListMedia(
     videoId: string;
     title: string;
     thumbnails: string[];
+    index: number;
   }
 
   interface detailedPlayList {
@@ -125,13 +131,14 @@ export async function handleFetchPlayListMedia(
 
   var fullPlayList: itemDetails[] = [];
 
-  fullPlayListData?.forEach((item) => {
+  fullPlayListData?.forEach((item: any, index: number) => {
     const details = item?.playlistPanelVideoRenderer;
     if (details) {
       const playListItem: itemDetails = {
         thumbnails: details?.thumbnail?.thumbnails?.map((v) => v?.url),
-        title: details?.title?.simpleText,
-        videoId: details?.videoId
+        title: details?.title?.accessibility?.accessibilityData?.label,
+        videoId: details?.videoId,
+        index: index
       };
 
       fullPlayList.push(playListItem);
@@ -149,12 +156,30 @@ export async function handleFetchPlayListMedia(
   });
 
   let replyMessage = `🎶 *Now Downloading Playlist:* _"${results.title}"_\n\n`;
-
   results.fullPlayList.forEach((song, index) => {
     replyMessage += `🎵 *Song ${index + 1}:* _"${song.title}"_\n`;
   });
 
   await ctx.reply(replyMessage);
+
+  const firstItem = fullPlayList[0];
+  let testMessage = `🎶 *Now Downloading Song:* _"${firstItem.title}"_\n\n`;
+
+  const REQ_PLAYLIST_ITEM_BODY = JSON.stringify(
+    getPlaylistItemHeaderParams(playlistUrl, firstItem.index)
+  );
+  const playlist_item_response = await fetch(`${process.env.YT_PLAYER_API}`, {
+    method: "POST",
+    body: REQ_PLAYLIST_ITEM_BODY
+  });
+
+  console.log({ playlist_item_response: playlist_item_response });
+
+  await ctx.replyWithPhoto(
+    { url: firstItem.thumbnails[0], filename: "Testing Image" },
+    { caption: testMessage, parse_mode: "Markdown" }
+  );
+
   return outputFolder;
 }
 
