@@ -156,13 +156,12 @@ export async function handleFetchPlayListMedia(
     replyMessage += `🎵 *Song ${index + 1}:* _"${song.title}"_\n\n`;
   });
 
-  await ctx.replyWithAnimation(
-    {
-      url: process.env.LOADING_GIF!.toString(),
-      filename: "Loading_GIF.gif"
-    },
-    { caption: replyMessage, parse_mode: "Markdown" }
-  );
+  await ctx.reply(replyMessage);
+
+  await ctx.replyWithAnimation({
+    url: process.env.LOADING_GIF!.toString(),
+    filename: "Loading_GIF.gif"
+  });
 
   const firstItem = fullPlayList[0];
   const REQ_PLAYLIST_ITEM_BODY = JSON.stringify(
