@@ -70,6 +70,7 @@ export async function handleFetchPlayListMedia(
   const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
   const execPromise = promisify(exec);
+  const ytDlpPath = path.resolve("../../bin/yt-dlp");
 
   try {
     await fs.promises.access(tempDir);
@@ -95,7 +96,9 @@ export async function handleFetchPlayListMedia(
   const downloadUrl = "https://youtu.be/2IH8tNQAzSs";
 
   try {
-    const { stdout } = await execPromise(`yt-dlp -f best -g "${downloadUrl}"`);
+    const { stdout } = await execPromise(
+      `${ytDlpPath} -f best -g "${downloadUrl}"`
+    );
     const videoUrl = stdout.trim();
     console.log({ videoUrl });
   } catch (error) {
