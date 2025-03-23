@@ -145,12 +145,10 @@ export async function handleFetchPlayListMedia(
   };
 
   console.log({
-    results0: data?.contents?.twoColumnWatchNextResults,
-    results1: data?.contents?.twoColumnWatchNextResults?.playlist,
-    results2: data?.contents?.twoColumnWatchNextResults?.playlist?.playlist
+    results: results
   });
 
-  ctx.reply("Done!");
+  ctx.reply(JSON.stringify(results));
   return outputFolder;
 }
 
