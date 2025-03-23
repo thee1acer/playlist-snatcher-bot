@@ -72,6 +72,8 @@ export async function handleFetchPlayListMedia(
   const execPromise = promisify(exec);
   const ytDlpPath = path.resolve("../../bin/yt-dlp");
 
+  console.log({ path: path });
+
   try {
     await fs.promises.access(tempDir);
   } catch {
