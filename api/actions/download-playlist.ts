@@ -174,10 +174,10 @@ export async function handleFetchPlayListMedia(
     thumbnails: firstItem.thumbnails
   });
 
-  await ctx.replyWithPhoto(
+  await ctx.replyWithAnimation(
     {
-      url: "https://media2.giphy.com/media/WQ3REUQR418t6sdCX8/200w.gif?cid=6c09b952glytj84dvkt7pfag1lu50647szd3jukbjxobdxp4&ep=v1_gifs_search&rid=200w.gif&ct=g",
-      filename: "Testing Image"
+      url: process.env.LOADING_GIF!.toString(),
+      filename: "Loading GIF"
     },
     { caption: testMessage, parse_mode: "Markdown" }
   );
