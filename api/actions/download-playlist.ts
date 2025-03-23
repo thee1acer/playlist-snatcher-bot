@@ -89,7 +89,7 @@ export async function handleFetchPlayListMedia(
 
   const REQ_BODY = JSON.stringify(getRequestParams());
 
-  const response = fetch(`${process.env.YT_API}`, {
+  const response = await fetch(`${process.env.YT_API}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
