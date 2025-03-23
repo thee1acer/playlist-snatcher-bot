@@ -87,10 +87,13 @@ export async function handleFetchPlayListMedia(
     return;
   }
 
-  //const response = await fetch(playlistUrl);
+  const downloadUrl = "https://youtu.be/2IH8tNQAzSs";
+  const result = await fetch(`${process.env.YT_API}/info/?url=${downloadUrl}`);
+
+  console.log({ result: result });
   console.log({ response: outputFolder });
 
-  return "";
+  return outputFolder;
 }
 
 export async function handleSendPlayListZipFile(
