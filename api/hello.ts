@@ -6,9 +6,8 @@ import { handleHelpCommand } from "./commands/help";
 import { handleAboutCommand } from "./commands/about";
 import { handleInteractiveMenuCommand } from "./commands/menu";
 import {
-  handleDownloadPlayListAction,
-  handleFetchPlayListMedia,
-  handleSendPlayListZipFile
+  handlePlayListDownloadRequest,
+  handleFetchPlayListMedia
 } from "./actions/download-playlist";
 import {
   handleViewAllDownloadHistory,
@@ -42,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 //actions
 bot.action(
   "download_playlist",
-  async (ctx) => await handleDownloadPlayListAction(ctx)
+  async (ctx) => await handlePlayListDownloadRequest(ctx)
 );
 
 bot.action(
