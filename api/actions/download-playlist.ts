@@ -12,6 +12,9 @@ import archiver from "archiver";
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
+import { exec } from "child_process";
+import { promisify } from "util";
+
 export async function handleDownloadPlayListAction(ctx: Context) {
   const { id } = ctx.from!;
   const userSubscription = await userIsSubscribed(id);
@@ -66,6 +69,8 @@ export async function handleFetchPlayListMedia(
   const tempDir = "/tmp";
   const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
+  const execPromise = promisify(exec);
+
   try {
     await fs.promises.access(tempDir);
   } catch {
@@ -88,10 +93,17 @@ export async function handleFetchPlayListMedia(
   }
 
   const downloadUrl = "https://youtu.be/2IH8tNQAzSs";
-  const result = await fetch(`${downloadUrl}`);
-
-  console.log({ result: result });
+  //const result = await fetch(`${downloadUrl}`);
+  //console.log({ result: result });
   console.log({ response: outputFolder });
+
+  try {
+    const { stdout } = await execPromise(`yt-dlp -f best -g ${downloadUrl}`);
+    const videoUrl = stdout.trim();
+    console.log({ videoUrl: videoUrl });
+  } catch (error) {
+    console.log({ error: "Failed to fetch video URL" });
+  }
 
   return outputFolder;
 }
