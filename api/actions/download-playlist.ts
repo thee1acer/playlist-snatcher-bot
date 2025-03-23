@@ -97,7 +97,7 @@ export async function handleFetchPlayListMedia(
 
   const downloadUrl = "https://youtu.be/2IH8tNQAzSs";
 
-  try {
+  /*try {
     const { stdout } = await execPromise(
       `${ytDlpPath} -f best -g "${downloadUrl}"`
     );
@@ -108,7 +108,12 @@ export async function handleFetchPlayListMedia(
       error: "Failed to fetch video URL",
       details: error.message
     });
-  }
+  }*/
+
+  const { stdout } = await execPromise(
+    process.platform === "win32" ? "dir /s" : "ls -R"
+  );
+  console.log(stdout);
 
   return outputFolder;
 }
