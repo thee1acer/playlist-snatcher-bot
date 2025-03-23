@@ -88,7 +88,7 @@ export async function handleFetchPlayListMedia(
   }
 
   const downloadUrl = "https://youtu.be/2IH8tNQAzSs";
-  const result = await fetch(`${process.env.YT_API}/info/?url=${downloadUrl}`);
+  const result = await fetch(`${downloadUrl}`);
 
   console.log({ result: result });
   console.log({ response: outputFolder });
