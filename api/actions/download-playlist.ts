@@ -91,13 +91,22 @@ export async function handleFetchPlayListMedia(
 
   const response = await fetch(`${process.env.YT_API}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
     body: REQ_BODY
   });
 
-  console.log({ response: response });
+  const contentEncoding = response.headers.get("content-encoding");
+
+  var data;
+  if (contentEncoding && contentEncoding.includes("gzip")) {
+    // Decompress the response body if it's gzipped
+    const decompressedBody = await response.text(); // or .json() if the response is in JSON format
+    data = JSON.parse(decompressedBody); // If it's JSON, parse it
+  } else {
+    // Directly use the response if not compressed
+    data = await response.json(); // or .text() depending on the response format
+  }
+
+  console.log({ response: data }); // Log the parsed response data
 
   return outputFolder;
 }
