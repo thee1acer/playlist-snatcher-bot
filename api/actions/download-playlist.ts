@@ -153,14 +153,18 @@ export async function handleFetchPlayListMedia(
 
   let replyMessage = `🎶 *Now Downloading Playlist:* _"${results.title}"_\n\n`;
   results.fullPlayList.forEach((song, index) => {
-    replyMessage += `🎵 *Song ${index + 1}:* _"${song.title}"_\n`;
+    replyMessage += `🎵 *Song ${index + 1}:* _"${song.title}"_\n\n`;
   });
 
-  await ctx.reply(replyMessage);
+  await ctx.replyWithAnimation(
+    {
+      url: process.env.LOADING_GIF!.toString(),
+      filename: "Loading_GIF.gif"
+    },
+    { caption: replyMessage, parse_mode: "Markdown" }
+  );
 
   const firstItem = fullPlayList[0];
-  let testMessage = `🎶 *Now Downloading Song:* _"${firstItem.title}"_\n\n`;
-
   const REQ_PLAYLIST_ITEM_BODY = JSON.stringify(
     getPlaylistItemHeaderParams(playlistUrl, firstItem.index)
   );
@@ -169,18 +173,15 @@ export async function handleFetchPlayListMedia(
     body: REQ_PLAYLIST_ITEM_BODY
   });
 
-  console.log({
-    playlist_item_response: playlist_item_response,
-    thumbnails: firstItem.thumbnails
-  });
+  var playlistItemData;
+  if (contentEncoding && contentEncoding.includes("gzip")) {
+    const decompressedBody = await response.text();
+    playlistItemData = JSON.parse(decompressedBody);
+  } else {
+    playlistItemData = await response.json();
+  }
 
-  await ctx.replyWithAnimation(
-    {
-      url: process.env.LOADING_GIF!.toString(),
-      filename: "Loading_GIF.gif"
-    },
-    { caption: testMessage, parse_mode: "Markdown" }
-  );
+  console.log({ playlistItemData: JSON.stringify(playlistItemData) });
 
   return outputFolder;
 }
