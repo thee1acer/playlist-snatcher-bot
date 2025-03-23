@@ -173,11 +173,14 @@ export async function handleFetchPlayListMedia(
   });
 
   var playlistItemData;
-  if (contentEncoding && contentEncoding.includes("gzip")) {
-    const decompressedBody = await response.text();
-    playlistItemData = JSON.parse(decompressedBody);
+  const playlistItemEncoding =
+    playlist_item_response.headers.get("content-encoding");
+
+  if (playlistItemEncoding && playlistItemEncoding.includes("gzip")) {
+    const decompressedPlaylistItemBody = await playlist_item_response.text();
+    playlistItemData = JSON.parse(decompressedPlaylistItemBody);
   } else {
-    playlistItemData = await response.json();
+    playlistItemData = await playlist_item_response.json();
   }
 
   console.log({ playlistItemData: JSON.stringify(playlistItemData) });
