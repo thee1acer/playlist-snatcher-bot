@@ -93,16 +93,16 @@ export async function handleFetchPlayListMedia(
   }
 
   const downloadUrl = "https://youtu.be/2IH8tNQAzSs";
-  //const result = await fetch(`${downloadUrl}`);
-  //console.log({ result: result });
-  console.log({ response: outputFolder });
 
   try {
-    const { stdout } = await execPromise(`yt-dlp -f best -g ${downloadUrl}`);
+    const { stdout } = await execPromise(`yt-dlp -f best -g "${downloadUrl}"`);
     const videoUrl = stdout.trim();
-    console.log({ videoUrl: videoUrl });
+    console.log({ videoUrl });
   } catch (error) {
-    console.log({ error: "Failed to fetch video URL" });
+    console.error({
+      error: "Failed to fetch video URL",
+      details: error.message
+    });
   }
 
   return outputFolder;
