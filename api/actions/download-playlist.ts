@@ -98,17 +98,11 @@ export async function handleFetchPlayListMedia(
 
   var data;
   if (contentEncoding && contentEncoding.includes("gzip")) {
-    // Decompress the response body if it's gzipped
-    const decompressedBody = await response.text(); // or .json() if the response is in JSON format
-    data = JSON.parse(decompressedBody); // If it's JSON, parse it
+    const decompressedBody = await response.text();
+    data = JSON.parse(decompressedBody);
   } else {
-    // Directly use the response if not compressed
-    data = await response.json(); // or .text() depending on the response format
+    data = await response.json();
   }
-
-  console.log({
-    response: data?.twoColumnWatchNextResults?.playlist?.playlist?.playlistId
-  }); // Log the parsed response data
 
   interface itemDetails {
     videoId: string;
@@ -123,10 +117,11 @@ export async function handleFetchPlayListMedia(
   }
 
   const playlistId =
-    data?.twoColumnWatchNextResults?.playlist?.playlist?.playlistId;
-  const title = data?.twoColumnWatchNextResults?.playlist?.playlist?.title;
+    data?.contents?.twoColumnWatchNextResults?.playlist?.playlist?.playlistId;
+  const title =
+    data?.contents?.twoColumnWatchNextResults?.playlist?.playlist?.title;
   const fullPlayListData =
-    data?.twoColumnWatchNextResults?.playlist?.playlist?.contents;
+    data?.contents?.twoColumnWatchNextResults?.playlist?.playlist?.contents;
 
   var fullPlayList: itemDetails[] = [];
 
@@ -150,10 +145,9 @@ export async function handleFetchPlayListMedia(
   };
 
   console.log({
-    results: data,
-    results0: data?.twoColumnWatchNextResults,
-    results1: data?.twoColumnWatchNextResults?.playlist,
-    results2: data?.twoColumnWatchNextResults?.playlist?.playlist
+    results0: data?.contents?.twoColumnWatchNextResults,
+    results1: data?.contents?.twoColumnWatchNextResults?.playlist,
+    results2: data?.contents?.twoColumnWatchNextResults?.playlist?.playlist
   });
 
   ctx.reply("Done!");
