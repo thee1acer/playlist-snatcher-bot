@@ -130,7 +130,7 @@ export async function handleFetchPlayListMedia(
     if (details) {
       const playListItem: itemDetails = {
         thumbnails: details?.thumbnail?.thumbnails?.map((v) => v?.url),
-        title: details?.simpleText,
+        title: details?.title?.simpleText,
         videoId: details?.videoId
       };
 
