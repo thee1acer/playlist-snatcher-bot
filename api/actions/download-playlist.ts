@@ -151,10 +151,6 @@ export async function handleFetchPlayListMedia(
     fullPlayList: fullPlayList
   };
 
-  console.log({
-    results: results
-  });
-
   let replyMessage = `🎶 *Now Downloading Playlist:* _"${results.title}"_\n\n`;
   results.fullPlayList.forEach((song, index) => {
     replyMessage += `🎵 *Song ${index + 1}:* _"${song.title}"_\n`;
@@ -173,10 +169,16 @@ export async function handleFetchPlayListMedia(
     body: REQ_PLAYLIST_ITEM_BODY
   });
 
-  console.log({ playlist_item_response: playlist_item_response });
+  console.log({
+    playlist_item_response: playlist_item_response,
+    thumbnails: firstItem.thumbnails
+  });
 
   await ctx.replyWithPhoto(
-    { url: firstItem.thumbnails[0], filename: "Testing Image" },
+    {
+      url: "https://media2.giphy.com/media/WQ3REUQR418t6sdCX8/200w.gif?cid=6c09b952glytj84dvkt7pfag1lu50647szd3jukbjxobdxp4&ep=v1_gifs_search&rid=200w.gif&ct=g",
+      filename: "Testing Image"
+    },
     { caption: testMessage, parse_mode: "Markdown" }
   );
 
