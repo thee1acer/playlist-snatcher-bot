@@ -70,9 +70,9 @@ export async function handleFetchPlayListMedia(
   const outputFolder = `${tempDir}/playlist-${randomUUID()}`;
 
   const execPromise = promisify(exec);
-  const ytDlpPath = path.resolve("bin/yt-dlp");
+  const ytDlpPath = path.resolve("./bin/yt-dlp");
 
-  console.log({ path: path });
+  console.log({ ytDlpPath: ytDlpPath });
 
   try {
     await fs.promises.access(tempDir);
