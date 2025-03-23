@@ -126,7 +126,7 @@ export async function handleFetchPlayListMedia(
   var fullPlayList: itemDetails[] = [];
 
   fullPlayListData?.forEach((item) => {
-    const details = item?.[0]?.playlistPanelVideoRenderer;
+    const details = item?.playlistPanelVideoRenderer;
     if (details) {
       const playListItem: itemDetails = {
         thumbnails: details?.thumbnail?.thumbnails?.map((v) => v?.url),
@@ -148,7 +148,13 @@ export async function handleFetchPlayListMedia(
     results: results
   });
 
-  ctx.reply(JSON.stringify(results));
+  let replyMessage = `🎶 *Now Downloading Playlist:* _"${results.title}"_\n\n`;
+
+  results.fullPlayList.forEach((song, index) => {
+    replyMessage += `🎵 *Song ${index + 1}:* _"${song.title}"_\n`;
+  });
+
+  await ctx.reply(replyMessage);
   return outputFolder;
 }
 
