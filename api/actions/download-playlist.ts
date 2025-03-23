@@ -106,8 +106,52 @@ export async function handleFetchPlayListMedia(
     data = await response.json(); // or .text() depending on the response format
   }
 
-  console.log({ response: data }); // Log the parsed response data
+  console.log({
+    response: data?.twoColumnWatchNextResults?.playlist?.playlist?.playlistId
+  }); // Log the parsed response data
 
+  interface itemDetails {
+    videoId: string;
+    title: string;
+    thumbnails: string[];
+  }
+
+  interface detailedPlayList {
+    playlistId: string;
+    title: string;
+    fullPlayList: itemDetails[];
+  }
+
+  const playlistId =
+    data?.twoColumnWatchNextResults?.playlist?.playlist?.playlistId;
+  const title = data?.twoColumnWatchNextResults?.playlist?.playlist?.title;
+  const fullPlayListData =
+    data?.twoColumnWatchNextResults?.playlist?.playlist?.contents;
+
+  var fullPlayList: itemDetails[] = [];
+
+  fullPlayListData?.forEach((item) => {
+    const details = item?.[0]?.playlistPanelVideoRenderer;
+    if (details) {
+      const playListItem: itemDetails = {
+        thumbnails: details?.thumbnail?.thumbnails?.map((v) => v?.url),
+        title: details?.simpleText,
+        videoId: details?.videoId
+      };
+
+      fullPlayList.push(playListItem);
+    }
+  });
+
+  const results: detailedPlayList = {
+    playlistId: playlistId,
+    title: title,
+    fullPlayList: fullPlayList
+  };
+
+  console.log({ results: results });
+
+  ctx.reply("Done!");
   return outputFolder;
 }
 
