@@ -1,4 +1,8 @@
-export default function getRequestParams() {
+export default function getRequestParams(playlistUrl: string) {
+  const { videoId, playlistId } = extractParams(playlistUrl);
+
+  const shortLink = playlistId?.split("//www.youtube.com")?.[1] ?? "";
+
   return {
     context: {
       client: {
@@ -14,8 +18,7 @@ export default function getRequestParams() {
         clientVersion: "2.20250319.01.00",
         osName: "Windows",
         osVersion: "10.0",
-        originalUrl:
-          "https://www.youtube.com/watch?v=11uDPpkmNq4&list=RD11uDPpkmNq4&start_radio=1",
+        originalUrl: playlistUrl,
         screenPixelDensity: 0,
         platform: "DESKTOP",
         clientFormFactor: "UNKNOWN_FORM_FACTOR",
@@ -35,7 +38,7 @@ export default function getRequestParams() {
         memoryTotalKbytes: "8000000",
         clientScreen: "WATCH",
         mainAppWebInfo: {
-          graftUrl: "/watch?v=11uDPpkmNq4&list=RD11uDPpkmNq4&start_radio=1",
+          graftUrl: shortLink,
           pwaInstallabilityStatus: "PWA_INSTALLABILITY_STATUS_UNKNOWN",
           webDisplayMode: "WEB_DISPLAY_MODE_BROWSER",
           isWebNativeShareAvailable: true
@@ -54,8 +57,8 @@ export default function getRequestParams() {
           "CMQBEIrSDRgAIhMI5_La-JWgjAMVu5L0Bx2Lhw44MgpnLWhpZ2gtcmVjWg9GRXdoYXRfdG9fd2F0Y2iaAQYQjh4YngE="
       }
     },
-    videoId: "11uDPpkmNq4",
-    playlistId: "RD11uDPpkmNq4",
+    videoId: videoId,
+    playlistId: playlistId,
     params: "OALAAQE%3D",
     racyCheckOk: false,
     contentCheckOk: false,
@@ -66,4 +69,14 @@ export default function getRequestParams() {
     },
     captionsRequested: false
   };
+}
+
+function extractParams(playlistUrl: string) {
+  const url = new URL(playlistUrl);
+  const params = new URLSearchParams(url.search);
+
+  const videoId = params.get("v");
+  const playlistId = params.get("list");
+
+  return { videoId, playlistId };
 }
